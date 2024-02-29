@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>View Orders</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    .navbar {
+        background-color: #007bff;
+        overflow: hidden;
+    }
+    .navbar a{
+        float: left;
+        font-size: 18px;
+        margin: 0;
+        display: block;
+        color: #fff;
+        text-align: center;
+        padding: 25px 20px;
+        text-decoration: none;
+    }
+    .navbar a:hover, .product-card button:hover {
+        background-color: #0056b3;
+    }
+    .content {
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        max-width: 800px;
+    }
+    .order-card {
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .order-card h3 {
+        margin-top: 0;
+    }
+    .navbar .cart {
+        float: right;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    h2{
+        text-align: center;
+        margin: 2rem;
+    }
+
+</style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="place-order.html">Place Order</a>
+        <a href="#">View Orders</a>
+        <a href="#" id="logoutButton" class="cart">Logout</a>
+    </div>
+
+    <h2>View Orders</h2>
+    <div class="content">
+        <h3>Orders</h3>
+        <div id="orders-container"></div>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+
+            const username = localStorage.getItem('username');
+
+            if (!username) {
+                // If username does not exist, redirect to index.html
+                window.location.href = 'index.html';
+            }
+
+            const ordersContainer = document.getElementById("orders-container");
+
+            try {
+                // Fetch orders from server
+                const response = await fetch('http://localhost:3000/orders/cust');
+                const data = await response.json();
+
+                // Display orders
+                data.orders.forEach(order => {
+                    const orderCard = document.createElement('div');
+                    orderCard.classList.add('order-card');
+                    orderCard.innerHTML = `
+                        <h3>${order.product_name}</h3>
+                        <p>Price: $${order.price}</p>
+                        <p>Date: ${new Date(order.date).toLocaleDateString()}</p>
+                    `;
+                    ordersContainer.appendChild(orderCard);
+                });
+            } catch (error) {
+                console.error(error);
+                ordersContainer.innerHTML = '<p>Error fetching orders</p>';
+            }
+        });
+
+        document.getElementById('logoutButton').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior (page refresh)
+
+            // Clear localStorage
+            localStorage.removeItem('username');
+            localStorage.removeItem('loginType');
+            localStorage.removeItem('cartItems')
+
+            // Redirect to index.html
+            window.location.href = 'index.html';
+        });
+    </script>
+</body>
+</html>

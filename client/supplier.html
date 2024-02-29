@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Supplier Home Page</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #f4f4f4;
+    }
+    .navbar {
+        background-color: #007bff;
+        overflow: hidden;
+    }
+    .navbar h2 {
+        float: left;
+        font-size: 18px;
+        margin: 0;
+        color: #fff;
+        padding: 25px 20px;
+    }
+    .content {
+        margin: 20px auto;
+        padding: 20px;
+        background: #fff;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        max-width: 800px;
+    }
+    .product-card {
+        width: 90%;
+        position: relative;
+        background: #fff;
+        padding: 20px;
+        border-radius: 5px;
+        box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    .product-card h3 {
+        margin-top: 0;
+    }
+    .product-card input[type="number"] {
+        width: 60px;
+        padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 3px;
+        box-sizing: border-box;
+    }
+    .product-card button{
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        padding: 10px 15px;
+        background-color: #007bff;
+        border-radius: 5px;
+        position: absolute;
+        top: 10px;
+        right: 10px;
+    }
+    .form-group {
+        margin-bottom: 15px;
+    }
+    label {
+        display: block;
+        margin-bottom: 5px;
+    }
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+    .btn {
+        width: 100%;
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        padding: 10px 15px;
+        background-color: #007bff;
+        border-radius: 5px;
+    }
+
+    .prod-container{
+        margin-top: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .prod-container p{
+        margin-bottom: 2rem;
+        margin-top: 0;
+    }
+
+    .navbar a {
+        float: right;
+        font-size: 18px;
+        margin: 0;
+        display: block;
+        color: #fff;
+        text-align: center;
+        padding: 25px 20px;
+        text-decoration: none;
+    }
+
+    .navbar a:hover {
+        background-color: #0056b3;
+    }
+</style>
+</head>
+<body>
+    <div class="navbar">
+        <h2>Supplier Home Page</h2>
+        <a href="#" id="logoutButton" class="logout">Logout</a>
+    </div>
+    <div class="content">
+        <h2>Add Product</h2>
+        <form id="addProductForm">
+            <div class="form-group">
+                <label for="productName">Product Name:</label>
+                <input type="text" id="productName" name="productName" required>
+            </div>
+            <div class="form-group">
+                <label for="productDescription">Product Description:</label>
+                <input type="text" id="productDescription" name="productDescription" required>
+            </div>
+            <div class="form-group">
+                <label for="productPrice">Product Price:</label>
+                <input type="number" id="productPrice" name="productPrice" min="0" step="0.01" required>
+            </div>
+            <button type="submit" class="btn">Add Product</button>
+        </form>
+        <h2>Your Products</h2>
+        <div id="productContainer" class="prod-container">
+            <!-- Product cards will be dynamically added here -->
+            <!-- If no products, display "Add Products to View" -->
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async function() {
+            
+            try {
+                const response = await fetch('http://localhost:3000/products');
+                const data = await response.json();
+                
+                if (data.products) {
+                    const productContainer = document.getElementById('productContainer');
+                    productContainer.innerHTML = ''; // Clear existing content
+
+                    data.products.forEach(product => {
+                        const productCard = createProductCard(product.product_name, product.description, product.price, product.product_id);
+                        productContainer.appendChild(productCard);
+                    });
+                } else {
+                    console.error('Failed to fetch products');
+                } 
+            }
+            catch (error) {
+                    console.error(error);
+            }
+
+            const addProductForm = document.getElementById('addProductForm');
+
+            let productId = 1;
+
+            function createProductCard(productName, productDescription, productPrice, productId) {
+                const productCard = document.createElement('div');
+                productCard.classList.add('product-card');
+
+                // Add data-productId attribute to the card
+                productCard.dataset.productId = productId;
+
+                productCard.innerHTML = `
+                    <h3>${productName}</h3>
+                    <p>${productDescription}</p>
+                    <p>Price: $${productPrice}</p>
+                    <button class="remove-btn">Remove</button>
+                `;
+                // Reload the page
+                // window.location.reload();
+            
+                return productCard;
+            }
+
+            addProductForm.addEventListener('submit', async function(event) {
+                event.preventDefault();
+                
+                const productName = document.getElementById('productName').value;
+                const productDescription = document.getElementById('productDescription').value;
+                const productPrice = parseFloat(document.getElementById('productPrice').value);
+
+                try {
+                    const response = await fetch('http://localhost:3000/add-product', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            product_name: productName,
+                            description: productDescription,
+                            price: productPrice,
+                            // Add username based on your authentication logic
+                            username: username // Replace with actual username
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.message === 'Product added successfully') {
+                        // Clear the form and potentially refetch products
+                        console.log('Product added!');
+                        addProductForm.reset();
+                        // You can fetch products again here to update the UI
+                    } else {
+                        console.error(data.message);
+                        // Handle errors gracefully, like displaying an error message
+                    }
+                } catch (error) {
+                    console.error(error);
+                    // Handle network or other errors
+                }
+            });
+
+            productContainer.addEventListener('click', async function(event) {
+                if (event.target.classList.contains('remove-btn')) {
+                    const productCard = event.target.parentElement;
+                    const productId = productCard.dataset.productId; // Assuming you add a data-product-id attribute to each product card
+
+                    try {
+                        const response = await fetch(`http://localhost:3000/delete-product/${productId}`, {
+                            method: 'DELETE'
+                        });
+                        
+                        const data = await response.json();
+                        
+                        if (data.message === 'Product deleted successfully') {
+                            productCard.remove(); // Remove the product card from the UI
+                            console.log('Product deleted!');
+                        } else {
+                            console.error(data.message);
+                            // Handle errors gracefully, like displaying an error message
+                        }
+                    } catch (error) {
+                        console.error(error);
+                        // Handle network or other errors
+                    }
+                }
+            });
+
+
+        });
+        document.getElementById('logoutButton').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default link behavior (page refresh)
+
+            // Clear localStorage
+            localStorage.removeItem('username');
+
+            // Redirect to index.html
+            window.location.href = 'index.html';
+        });
+
+        const username = localStorage.getItem('username');
+            const accType = localStorage.getItem('loginType')
+
+            if (!username || accType !== 'Supplier') {
+                // If username does not exist, redirect to index.html
+                window.location.href = 'index.html';
+            }
+
+    </script>
+</body>
+</html>

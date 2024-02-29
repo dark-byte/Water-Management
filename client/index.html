@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            background-image: url(https://images.pexels.com/photos/1147124/pexels-photo-1147124.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2);
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        .login-box {
+            width: 300px;
+            margin: 2rem auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px 0px rgba(0,0,0,0.1);
+        }
+        .login-box h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .login-box select, .login-box input[type="submit"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            box-sizing: border-box;
+        }
+        .login-box input[type="submit"] {
+            background: #007bff;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .login-box input[type="submit"]:hover {
+            background: #0056b3;
+        }
+
+        .details input{
+            padding: 5px 10px;
+            margin-bottom: 5px;
+        }
+
+        .details{
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1rem;
+        }
+
+        h1{
+            text-align: center;
+            margin-top: 5rem;
+            color: #fff;
+            font-size: 56px;
+            text-shadow: .1em .1em 0 hsl(200 50% 30%);
+        }
+        
+    </style>
+</head>
+<body>
+    <h1>Water Management<br> System</h1>
+    <div class="login-box">
+        <h2>Login</h2>
+        <form action="#" method="post">
+            <select id="loginType" name="login_type">
+                <option value="customer">Customer</option>
+                <option value="supplier">Supplier</option>
+            </select>
+            <div class="details">
+                <input type="text" name="username" placeholder="Username" required>
+                <input type="password" name="password" placeholder="Password" required>
+            </div>
+            <input type="submit" value="Login">
+        </form>
+    </div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const loginForm = document.querySelector('.login-box form');
+
+        loginForm.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            var selectElement = document.getElementById('loginType');
+            var selectedOption = selectElement.options[selectElement.selectedIndex];
+
+            // Get the text value of the selected option
+            var selectedText = selectedOption.textContent;
+
+            const username = document.querySelector('[name="username"]').value;
+            const password = document.querySelector('[name="password"]').value;
+
+            try {
+                const response = await fetch('http://localhost:3000/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: username, password : password, account_type : selectedText })
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.json();
+                    throw new Error(errorMessage.message || 'Authentication failed');
+                }
+
+                // Authentication successful
+                // Store username and login type in local storage
+                localStorage.setItem('username', username);
+                localStorage.setItem('loginType', selectedText);
+
+                // Redirect to home page or perform any other action
+                if(selectedText === 'Customer'){
+                    window.location.href = 'place-order.html'; // Redirect to home page
+                }
+                else{
+                    window.location.href = 'supplier.html';
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Authentication failed. Please check your credentials.');
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

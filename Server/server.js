@@ -12,10 +12,10 @@ app.use(cors());
 
 // Define database connection details from environment variables
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'AdrishMitra@4',
-  database: process.env.DB_DATABASE || "WaterManagement",
+  host: process.env.DB_HOST ,
+  user: process.env.DB_USER ,
+  password: process.env.DB_PASSWORD ,
+  database: process.env.DB_DATABASE ,
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
